@@ -1,5 +1,7 @@
 import sys
-from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QLineEdit, QGridLayout, QWidget
+from stats import statsWindow
+from PyQt5.QtWidgets import QMainWindow, QApplication, QLabel, QPushButton, QLineEdit, QGridLayout, QWidget, \
+    QStackedWidget
 from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtCore import Qt, QTimer, QDateTime
 
@@ -9,10 +11,11 @@ BUTTON_WIDTH = 100
 BUTTON_HEIGHT = 100
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, stacked_widget):
         super().__init__()
+        self.stacked_widget = stacked_widget
         self.setWindowTitle("Pomodoro Timer")
-        self.setGeometry(300, 300, WINDOW_WIDTH, WINDOW_HEIGHT)
+        #self.setGeometry(300, 300, WINDOW_WIDTH, WINDOW_HEIGHT)
         self.setWindowIcon(QIcon("clock.png"))
         self.setStyleSheet("background-color: #fae8e0;")
         self.initUI()
@@ -32,6 +35,7 @@ class MainWindow(QMainWindow):
         self.time_label.setStyleSheet("color: #ef7c8e;"
                                  "font-weight: bold;")
 
+
         self.time_input_min = QLineEdit(self)
         self.time_input_min.setStyleSheet("font-size: 30px;")
         self.time_input_min.setPlaceholderText("Minutes")
@@ -42,6 +46,10 @@ class MainWindow(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.showTime)
 
+        self.stats_button = QPushButton("Statistics", self)
+        self.stats_button.setStyleSheet("font-size: 20px;")
+        self.stats_button.clicked.connect(self.showStats)
+
         self.startButton = QPushButton("Start", self)
         self.startButton.setStyleSheet("font-size: 30px;")
         self.startButton.clicked.connect(self.startTimer)
@@ -51,6 +59,8 @@ class MainWindow(QMainWindow):
         self.stopButton.clicked.connect(self.stopTimer)
 
         grid = QGridLayout()
+        grid.setSpacing(10)
+        grid.addWidget(self.stats_button, 0, 4, 1, 1)
         grid.addWidget(self.label, 0, 2, 1, 2, Qt.AlignCenter)
         grid.addWidget(self.time_input_min, 1, 2, 1, 1, Qt.AlignCenter)
         grid.addWidget(self.time_input_sec, 1, 3, 1, 1, Qt.AlignCenter)
@@ -102,10 +112,24 @@ class MainWindow(QMainWindow):
     def count_seconds(self, minutes, seconds):
         return minutes*60 + seconds
 
+
+    def showStats(self):
+        self.stacked_widget.setCurrentIndex(1)
+
 def main():
     app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
+    widget=QStackedWidget()
+
+    window = MainWindow(widget)
+    stats_window = statsWindow(widget)
+
+    widget.addWidget(window)
+    widget.addWidget(stats_window)
+
+    widget.setFixedHeight(WINDOW_HEIGHT)
+    widget.setFixedWidth(WINDOW_WIDTH)
+
+    widget.show()
     sys.exit(app.exec())
 
 if __name__ == '__main__':
