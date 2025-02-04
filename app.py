@@ -59,7 +59,7 @@ class MainWindow(QMainWindow):
         grid.addWidget(self.stopButton, 3, 4, 1, 1, Qt.AlignCenter)
         central_widget.setLayout(grid)
 
-        self.countdown_time = 100
+        self.countdown_time = None
 
     def showTime(self):
         if self.countdown_time > 0:
@@ -72,10 +72,22 @@ class MainWindow(QMainWindow):
             self.stopButton.setEnabled(False)
 
     def startTimer(self):
-        self.countdown_time = self.count_seconds(int(self.time_input_min.text()), int(self.time_input_sec.text()))
-        self.timer.start(1000)
-        self.startButton.setEnabled(False)
-        self.stopButton.setEnabled(True)
+        minutes = self.time_input_min.text()
+        seconds = self.time_input_sec.text()
+        minutes_valid = minutes.isdigit() or minutes==''
+        seconds_valid = seconds.isdigit() or seconds==''
+        if (minutes_valid or seconds_valid) and (minutes!='' or seconds!=''):
+            if minutes == '':
+                minutes = 0
+            if seconds == '':
+                seconds = 0
+            self.countdown_time = self.count_seconds(int(minutes), int(seconds))
+            self.timer.start(1000)
+            self.startButton.setEnabled(False)
+            self.stopButton.setEnabled(True)
+        else:
+            self.time_label.setText("Please enter a valid number")
+
 
     def stopTimer(self):
         self.timer.stop()
